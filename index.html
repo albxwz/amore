@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#80074C">
+<title>История двух молодых</title>
+<meta property="og:title" content="&#8203;">
+<meta property="og:description" content="&#8203;">
+<meta property="og:image" content="ukiuk.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="&#8203;">
+<meta name="twitter:description" content="&#8203;">
+<meta name="twitter:image" content="ukiuk.jpg">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== Экран загрузки (блокирует всё, пока не загрузятся все файлы) ===== -->
+<div class="loading-screen" id="loading-screen">
+  <div class="loading-box">
+    <div class="loading-heart">❤︎</div>
+    <p class="loading-title">Загрузка…</p>
+    <div class="loading-bar"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
+    <p class="loading-percent" id="loading-percent">0%</p>
+    <p class="loading-warning">Пожалуйста, подождите и не обновляйте и не закрывайте страницу</p>
+  </div>
+</div>
+
+<!-- ===== Подсказка "поверните телефон" - поверх всей игры, пока телефон
+     физически портретный (чистый CSS, см. .rotate-hint-overlay) ===== -->
+<div class="rotate-hint-overlay">
+  <div class="rotate-hint-icon">📱↻</div>
+  <p>Поверните телефон горизонтально для игры</p>
+</div>
+
+<div id="app">
+
+  <!-- ===== Главный экран ===== -->
+  <section class="screen" data-screen="home">
+    <div class="hearts-bg" id="home-hearts"></div>
+    <div class="home-content">
+      <div class="logo-wrap">
+        <img id="logo-img" class="logo-img" src="logo.png" alt="Логотип">
+        <div class="placeholder-box placeholder-box--logo" id="logo-placeholder" hidden>❤︎</div>
+      </div>
+      <button class="btn btn--primary" id="start-game-btn">Начать игру</button>
+    </div>
+  </section>
+
+  <!-- ===== Экран видео (общий для всех этапов) ===== -->
+  <section class="screen" data-screen="video">
+    <video id="stage-video" class="stage-video" playsinline webkit-playsinline="true" preload="auto"></video>
+    <div class="placeholder-box placeholder-box--video" id="stage-video-placeholder" hidden>Видео будет здесь</div>
+    <button class="skip-btn" id="video-skip-btn" hidden>Пропустить ›</button>
+  </section>
+
+  <!-- ===== Экран фото (общий для всех этапов) ===== -->
+  <section class="screen" data-screen="photo">
+    <div class="photo-frame photo-frame--solid" id="photo-frame">
+      <img id="stage-photo-img" class="photo-img" src="" alt="">
+      <div class="placeholder-box placeholder-box--photo" id="stage-photo-placeholder" hidden>Фото будет здесь</div>
+    </div>
+
+    <div class="snow-layer" id="photo-snow" hidden></div>
+
+    <button class="btn btn--cta cta-pulse" id="photo-cta-btn" hidden>Задание</button>
+
+    <!-- только для 1-го этапа: фото по краям экрана -->
+    <div class="quiz-side quiz-side--girl" id="quiz-side-girl-wrap">
+      <img id="quiz-side-girl" class="quiz-side-img" src="girl.png" alt="">
+      <div class="placeholder-box placeholder-box--side" id="quiz-side-girl-placeholder" hidden>👩</div>
+    </div>
+    <div class="quiz-side quiz-side--boy" id="quiz-side-boy-wrap">
+      <img id="quiz-side-boy" class="quiz-side-img" src="boy.png" alt="">
+      <div class="placeholder-box placeholder-box--side" id="quiz-side-boy-placeholder" hidden>🧑</div>
+    </div>
+
+    <!-- только для 1-го этапа: диалог-викторина -->
+    <div class="quiz-sheet" id="quiz-sheet" hidden>
+      <div class="quiz-counter" id="quiz-counter">Вопрос 1 из 3</div>
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-answers" id="quiz-answers"></div>
+      <div class="quiz-feedback" id="quiz-feedback" hidden>Попробуй ещё раз ❤️</div>
+    </div>
+
+    <!-- только для 1-го этапа: конверт -->
+    <div class="envelope-wrap" id="envelope-wrap" hidden>
+      <img class="envelope" id="envelope" src="envelope.jpg" alt="Конверт">
+      <div class="envelope-hint">Нажми, чтобы открыть</div>
+    </div>
+  </section>
+
+  <!-- ===== Экран пазла (2-й этап) ===== -->
+  <section class="screen" data-screen="puzzle">
+    <div class="hearts-bg" id="puzzle-hearts"></div>
+    <div class="puzzle-wrap">
+      <div class="puzzle-stack">
+        <div class="puzzle-container" id="puzzle-container">
+          <div class="puzzle-grid" id="puzzle-grid"></div>
+          <div class="puzzle-hint-overlay" id="puzzle-hint-overlay"></div>
+        </div>
+        <button class="btn btn--primary" id="puzzle-continue-btn" hidden>Следующее задание</button>
+      </div>
+      <span class="puzzle-moves" id="puzzle-move-count">Ходов: 0</span>
+      <button class="btn btn--small" id="puzzle-hint-btn">Подсказка</button>
+    </div>
+  </section>
+
+  <!-- ===== Экран карточек с вопросами (доп. задание 2-го этапа) ===== -->
+  <section class="screen" data-screen="cards">
+    <div class="hearts-bg" id="cards-hearts"></div>
+    <div class="cards-intro" id="cards-intro">
+      <p id="cards-intro-text">На следующие вопросы каждый из вас должен ответить, выразив своё мнение!</p>
+      <button class="btn btn--primary" id="cards-start-btn">Начать</button>
+    </div>
+    <div class="cards-view" id="cards-view" hidden>
+      <div class="question-card" id="question-card">
+        <div class="question-card-counter" id="question-card-counter">Вопрос 1 из 5</div>
+        <div class="question-card-text" id="question-card-text"></div>
+      </div>
+      <button class="btn btn--primary" id="cards-next-btn">Следующий</button>
+    </div>
+  </section>
+
+  <!-- ===== Экран послания в будущее (3-й этап) ===== -->
+  <section class="screen" data-screen="message">
+    <div class="hearts-bg" id="message-hearts"></div>
+    <div class="message-scroll">
+      <div class="message-wrap">
+        <div class="message-task">
+          <h2>Что бы вы хотели сказать самим себе в будущем?</h2>
+          <p>Представьте, что прошло 5 или 10 лет. Какими вы стали? О чём мечтаете, чего уже добились и что хотели бы пожелать себе сегодняшним?</p>
+          <p>Оставьте послание самим себе в будущее, которое однажды вы сможете перечитать вместе и вспомнить этот особенный момент.</p>
+        </div>
+        <textarea id="future-letter-textarea" class="future-letter-textarea" placeholder="Дорогие мы из будущего…"></textarea>
+        <div class="message-actions">
+          <button class="btn btn--primary" id="save-pdf-btn">Сохранить в PDF</button>
+          <p class="pdf-ios-hint" id="pdf-ios-hint" hidden>Нажмите «Поделиться» → «Сохранить в Файлы»</p>
+        </div>
+        <button class="btn btn--primary" id="message-finish-btn" hidden>Завершить</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Финальный экран ===== -->
+  <section class="screen" data-screen="final">
+    <div class="hearts-bg" id="final-hearts"></div>
+    <div class="final-content">
+      <h1 id="final-title">Поздравляем! Вы успешно прошли игру ❤️</h1>
+      <div class="final-actions">
+        <button class="btn btn--primary" id="download-again-btn">Скачать послание ещё раз</button>
+        <button class="btn btn--secondary" id="restart-btn">Начать заново</button>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /#app -->
+
+<!-- ===== Модальные окна ===== -->
+<div class="modal" id="modal-rules" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <h2>Правила игры</h2>
+    <p>Вам предстоит пройти 3 этапа. Чтобы победить в игре, необходимо успешно пройти все три этапа.</p>
+    <p>Готовы?</p>
+    <button class="btn btn--primary" id="rules-start-btn">Начать 1-й этап</button>
+  </div>
+</div>
+
+<div class="modal" id="modal-resume" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <p id="resume-text">Продолжить с этапа?</p>
+    <div class="modal-actions">
+      <button class="btn btn--primary" id="resume-continue-btn">Продолжить</button>
+      <button class="btn btn--secondary" id="resume-restart-btn">Начать заново</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-letter" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="letter-paper">
+    <div class="letter-paper-body" id="letter-paper-body"></div>
+    <button class="btn btn--primary" id="letter-continue-btn">Перейти к следующему этапу</button>
+  </div>
+</div>
+
+<!-- ===== Постоянные элементы интерфейса ===== -->
+<div class="stage-indicator" id="stage-indicator" hidden>Этап 1 из 3</div>
+<button class="mute-btn" id="mute-toggle" aria-label="Выключить звук">🔊</button>
+
+<!-- ===== Канвас салюта ===== -->
+<canvas id="fireworks-canvas"></canvas>
+
+<!-- ===== Скрытый шаблон страницы PDF (для html2canvas) ===== -->
+<div id="pdf-letter-page">
+  <div id="pdf-title">Послание в будущее</div>
+  <div id="pdf-body"></div>
+  <div id="pdf-date"></div>
+</div>
+
+<script src="html2canvas.min.js" defer></script>
+<script src="jspdf.umd.min.js" defer></script>
+<script src="audio.js" defer></script>
+<script src="fireworks.js" defer></script>
+<script src="quiz.js" defer></script>
+<script src="puzzle.js" defer></script>
+<script src="message.js" defer></script>
+<script src="main.js" defer></script>
+</body>
+</html>
